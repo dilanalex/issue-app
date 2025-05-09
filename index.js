@@ -5,6 +5,8 @@ const bodyParser = require('koa-bodyparser');
 
 const config = require('./config');
 const router = require('./lib/routes');
+const sequelize = require('./lib/models/connection');
+require('./lib/models/user');
 
 const app = new Koa();
 
@@ -14,3 +16,4 @@ app.use(router.allowedMethods());
 
 app.listen(config.port);
 console.log('Listening on http://localhost:%s/', config.port);
+
