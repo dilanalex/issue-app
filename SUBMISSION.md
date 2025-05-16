@@ -6,6 +6,10 @@ This document describes the API for the Issue Tracking System. It outlines the e
 
 http://localhost:8080/docs
 
+### Git Repository URL
+
+https://github.com/dilanalex/issue-app
+
 ### Prerequisites
 ------------------------------
 
