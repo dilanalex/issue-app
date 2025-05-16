@@ -2,6 +2,10 @@
 
 This document describes the API for the Issue Tracking System. It outlines the endpoints, their functionality, required parameters, and response formats.
 
+### Swagger API Doc
+
+http://localhost:8080/docs
+
 ### Prerequisites
 ------------------------------
 

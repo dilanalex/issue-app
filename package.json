@@ -12,8 +12,10 @@
     "koa": "^2.15.3",
     "koa-bodyparser": "^4.4.1",
     "koa-router": "^12.0.1",
+    "koa2-swagger-ui": "^5.11.0",
     "mysql2": "^3.9.7",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "swagger-jsdoc": "^6.2.8"
   },
   "author": "Testlio",
   "license": "ISC"
