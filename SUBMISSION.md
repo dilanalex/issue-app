@@ -3,6 +3,7 @@
 This document describes the API for the Issue Tracking System. It outlines the endpoints, their functionality, required parameters, and response formats.
 
 ### Prerequisites
+------------------------------
 
 Before using the API, you need to register a super administrator user.
 
@@ -87,6 +88,7 @@ The system has three types of users, with roles and permissions managed in the d
 * **normal:** Basic user, typically can create and view issues.
 
 ### User Management
+-----------------------
 
 These endpoints are for managing users in the system. Role-based access control is enforced.
 
@@ -187,7 +189,8 @@ These endpoints are for managing users in the system. Role-based access control 
                 {
                     "id": "integer",
                     "username": "string",
-                    "role": "string"
+                    "user_groud": "string",
+                    "email" : "string"
                 },
                 // ... more users
             ]
@@ -237,15 +240,164 @@ These endpoints are for managing users in the system. Role-based access control 
     * Status Code: 500 Internal Server Error
         * Body: `{"error": "Failed to fetch user."}`
 
+### Issue Management
+-----------------------
+
+### Create Issue
+
+* **Endpoint:** `POST /issues`
+* **Description:** Creates a new issue. Requires a valid JWT from a normal user or an admin.
+* **Request Headers:**
+    * `Authorization`: `Bearer <token>` (Replace `<token>` with the actual JWT)
+* **Request Body:**
+
+    ```json
+    {
+        "title": "string",       // Required
+        "description": "string"  // Required
+    }
+    ```
+
+* **Response:**
+
+    * Status Code: 201 Created
+    * Body:
+
+        ```json
+        {
+            "title": "string",
+            "description": "string"
+        }
+    ```
+
+* **Error Responses:**
+
+    * Status Code: 400 Bad Request
+        * Body: `{"error": "Title and description are required."}`
+    * Status Code: 401 Unauthorized
+        * Body: `{"error": "No token provided."}` or `{"error": "Invalid or expired token."}`
+    * Status Code: 500 Internal Server Error
+        * Body: `{"error": "Failed to create issue."}`
+
+#### Get Issue
+
+* **Endpoint:** `GET /issues/:id`
+* **Description:** Retrieves a single issue by its ID. Requires a valid JWT from a normal user or an admin.
+* **Request Headers:**
+    * `Authorization`: `Bearer <token>` (Replace `<token>` with the actual JWT)
+* **Path Parameters:**
+    * `id`: The ID of the issue to retrieve.
+* **Response:**
+
+    * Status Code: 200 OK
+    * Body:
+
+        ```json
+        {
+            "issue":{
+                "id": "integer",
+                "title": "string",
+                "description": "string",
+                "userId": "integer",
+                "created_at": "string",
+                "created_by": "string",
+                "updated_at": "string",
+                "updated_by": "string"
+            }
+        }
+        ```
+
+* **Error Responses:**
+
+    * Status Code: 401 Unauthorized
+        * Body: `{"error": "No token provided."}` or `{"error": "Invalid or expired token."}`
+    * Status Code: 500 Internal Server Error
+        * Body: `{"error": "Failed to get the issue"}`
+
+#### Update Issue
+
+* **Endpoint:** `PATCH /issues/:id`
+* **Description:** Updates an existing issue. Requires a valid JWT from a normal user or an admin.
+* **Request Headers:**
+    * `Authorization`: `Bearer <token>`
+* **Path Parameters:**
+    * `id`: The ID of the issue to update.
+* **Request Body:**
+
+    ```json
+    {
+        "title": "string",      
+        "description": "string"
+    }
+    ```
+
+* **Response:**
+
+    * Status Code: 200 OK
+    * Body: The updated issue object (same structure as the Create Issue response).
+
+* **Error Responses:**
+
+    * Status Code: 400 Bad Request
+        * Body: `{"error": "Invalid input."}`
+    * Status Code: 401 Unauthorized
+        * Body: `{"error": "No token provided."}` or `{"error": "Invalid or expired token."}`
+    * Status Code: 404 Not Found
+        * Body: `{"error": "Issue not found."}`
+    * Status Code: 500 Internal Server Error
+        * Body: `{"error": "Failed to update issue."}`
+
+### Issue Revisions
+
+Each update to an issue creates a new revision, allowing you to track the history of changes.
+
+#### Get Issue Revisions
+
+* **Endpoint:** `GET /issues/:issueId/revisions`
+* **Description:** Retrieves all revisions for a specific issue. Requires a valid JWT from a normal user or an admin.
+* **Request Headers:**
+    * `Authorization`: `Bearer <token>`
+* **Path Parameters:**
+    * `issueId`: The ID of the issue for which to retrieve revisions.
+* **Response:**
+
+    * Status Code: 200 OK
+    * Body: An array of revision objects, ordered by `updatedAt` in descending order (most recent first).
+
+        ```json
+        [
+            {
+                "id": "integer",
+                "issueId": "integer",
+                "userId": "integer",        // ID of the user who made the revision
+                "currentState": "object", // The complete state of the issue after this revision
+                "changes": "object | null",   // The fields that were changed in this revision, or null for initial creation
+                "updatedAt": "string", 
+                "user": {               // Information about the user who made the revision
+                    "id": "integer",
+                    "username": "string"
+                }
+            },
+            // ... more revisions
+        ]
+        ```
+
+* **Error Responses:**
+
+    * Status Code: 401 Unauthorized
+        * Body: `{"error": "No token provided."}` or `{"error": "Invalid or expired token."}`
+    * Status Code: 500 Internal Server Error
+        * Body: `{"error": "Failed to fetch issue revisions."}`
+
 #### Phase II System Updates
 
-**Proper user management (role permissions in the database)**
-**Delete user functionality**
-**Issue assignee**
-**Issue release**
-**Issue status**
-**Archive Issues**
-**Dev swag for an issue**
+* **Proper user management (role permissions in the database)**
+* **Delete user functionality**
+* **Issue assignee**
+* **Issue release**
+* **Issue status**
+* **Archive Issues**
+* **Dev swag for an issue**
 
 #### Delete User
 
@@ -284,12 +436,12 @@ These endpoints are for managing users in the system. Role-based access control 
 
     ```json
     {
-        "title": "string",       // Required
-        "description": "string",  // Required
-        "assigneeId": "integer",  // Optional: ID of the user to assign the issue to
-        "releaseId": "integer",   // Optional: ID of the release the issue is associated with
-        "status": "string",       // Optional: Initial status of the issue (e.g., "open", "ready for development")
-        "devSwag": "string"      // Optional: Dev swag for the issue
+        "title": "string",  
+        "description": "string", 
+        "assigneeId": "integer", 
+        "releaseId": "integer",  
+        "status": "string",  //(e.g., "open", "ready for development")
+        "devSwag": "string"  
     }
     ```
 
